@@ -1,1 +1,0 @@
-# krishi-mitra
