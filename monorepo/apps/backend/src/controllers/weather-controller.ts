@@ -2,16 +2,23 @@ import { Request, Response } from "express";
 import { getWeather } from "../services/weather-service";
 
 export const fetchWeather = async (req: Request, res: Response) => {
-  const { lat, lon } = req.query;
+  const { city } = req.query;
 
-  if (!lat || !lon) {
-    return res.status(400).json({ error: "Latitude and Longitude are required" });
+  if (!city || typeof city !== "string") {
+    return res.status(400).json({ error: "City is required" });
   }
 
   try {
-    const weatherData = await getWeather(parseFloat(lat as string), parseFloat(lon as string));
-    res.json(weatherData);
+    const weatherData = await getWeather(city);
+    
+    res.json({
+      location: weatherData.name,
+      temperature: weatherData.main.temp,
+      description: weatherData.weather[0].description,
+      windSpeed: weatherData.wind.speed,
+    });
   } catch (error) {
+    console.error("Weather API Error:", error);
     res.status(500).json({ error: "Error fetching weather data" });
   }
 };

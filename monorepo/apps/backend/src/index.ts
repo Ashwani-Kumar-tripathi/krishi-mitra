@@ -12,6 +12,8 @@ import connectDB from "./connections/database";
 import { errorHandler } from "./middlewares/error-handler";
 import userRouter from "./routes/user-router";
 import croprouter from "./routes/crop-recommendation-router"
+import weather from "./routes/weather-router"
+import irrigation from "./routes/irrigation-routes"
 
 
 const app = express();
@@ -33,12 +35,12 @@ declare global {
 
 // NOTE: Use this only if you are deploying
 // and if you wanna make this acccessible via frontend.
-// app.use(
-//   cors({
-//     origin: process.env.CLIENT_URL,
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
 
 app.use(helmet());
 app.use(express.json());
@@ -46,6 +48,8 @@ app.use(authRouter);
 app.use(cookieParser());
 app.use("/users", authenticate, userRouter);
 app.use(croprouter);
+app.use(weather);
+app.use("/irrigation", irrigation);
 app.use(errorHandler);
 
 connectDB();
