@@ -14,6 +14,7 @@ import userRouter from "./routes/user-router";
 import croprouter from "./routes/crop-recommendation-router"
 import weather from "./routes/weather-router"
 import irrigation from "./routes/irrigation-routes"
+import compression from "compression";
 
 
 const app = express();
@@ -42,17 +43,26 @@ app.use(
   })
 );
 
+
+
+app.use(compression());
 app.use(helmet());
 app.use(express.json());
 app.use(authRouter);
 app.use(cookieParser());
 app.use("/users", authenticate, userRouter);
-app.use(croprouter);
-app.use(weather);
+app.use("/crops", croprouter);
+app.use("/weather", weather);
+
 app.use("/irrigation", irrigation);
 app.use(errorHandler);
 
 connectDB();
+
+export const config = {
+  port: process.env.PORT || 8000,
+  clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
+};
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

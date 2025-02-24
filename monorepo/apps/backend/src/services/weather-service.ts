@@ -1,6 +1,10 @@
 import axios from "axios";
+import Redis from "ioredis";
 
 const API_KEY = process.env.OPENWEATHER_API_KEY;
+if (!API_KEY) throw new Error("Missing OpenWeather API Key");
+
+const redis = new Redis();
 
 interface WeatherResponse {
   weather: { id: number; main: string; description: string; icon: string }[];
@@ -16,10 +20,9 @@ interface WeatherResponse {
   name: string;
 }
 
-export async function getWeather(city: string): Promise<WeatherResponse> {
-  if (!city) {
-    throw new Error("City name must be provided");
-  }
+// Function to fetch live weather data
+async function getWeather(city: string): Promise<WeatherResponse> {
+  if (!city) throw new Error("City name must be provided");
 
   try {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
@@ -34,3 +37,16 @@ export async function getWeather(city: string): Promise<WeatherResponse> {
   }
 }
 
+// Function to check cache first before calling API
+export async function getWeatherWithCache(city: string): Promise<WeatherResponse> {
+  if (!city) throw new Error("City is required");
+
+  const cachedWeather = await redis.get(city);
+  if (cachedWeather) return JSON.parse(cachedWeather); // Return cached data if exists
+
+  // Fetch new data if not in cache
+  const weatherData = await getWeather(city);
+  await redis.set(city, JSON.stringify(weatherData), "EX", 3600); // Cache for 1 hour
+
+  return weatherData;
+}

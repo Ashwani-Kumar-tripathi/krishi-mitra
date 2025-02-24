@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { getWeather } from "../services/weather-service";
-
+import { getWeatherWithCache } from "../services/weather-service";
 export const fetchWeather = async (req: Request, res: Response) => {
   const { city } = req.query;
 
@@ -9,7 +8,7 @@ export const fetchWeather = async (req: Request, res: Response) => {
   }
 
   try {
-    const weatherData = await getWeather(city);
+    const weatherData = await getWeatherWithCache(city);
     
     res.json({
       location: weatherData.name,

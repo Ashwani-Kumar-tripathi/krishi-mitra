@@ -21,5 +21,8 @@ const IrrigationScheduleSchema = new Schema<IIrrigationSchedule>(
   { timestamps: true }
 );
 
+IrrigationScheduleSchema.index({ userId: 1, irrigationTime: 1 });
+
+
 const IrrigationSchedule = mongoose.model<IIrrigationSchedule>("IrrigationSchedule", IrrigationScheduleSchema);
 export default IrrigationSchedule;

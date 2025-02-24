@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { getWeather } from "../services/weather-service";
+import { getWeatherWithCache } from "../services/weather-service";
 import IrrigationSchedule from "../models/irrigation-model";
 
 // Create a new irrigation schedule
 export const createSchedule = async (req: Request, res: Response) => {
   try {
-    const { userId, soilType, irrigationTime, duration } = req.body;
+    let { userId, soilType, irrigationTime, duration } = req.body;
 
     // Validate request body
     if (!userId || !soilType || !irrigationTime || !duration) {
@@ -13,7 +13,7 @@ export const createSchedule = async (req: Request, res: Response) => {
     }
 
     // Fetch weather data
-    const weatherData = await getWeather("Your_City");
+    const weatherData = await getWeatherWithCache("Your_City");
     if (!weatherData || !weatherData.weather || weatherData.weather.length === 0) {
       return res.status(500).json({ error: "Failed to fetch valid weather data" });
     }
@@ -24,6 +24,10 @@ export const createSchedule = async (req: Request, res: Response) => {
     if (weatherCondition.toLowerCase().includes("rain")) {
       return res.status(400).json({ error: "Irrigation not needed due to rain" });
     }
+
+    if (soilType === "sandy" && weatherData.main.temp > 30) {
+      duration = duration * 1.2;
+    } 
 
     // Create schedule
     const schedule = new IrrigationSchedule({
