@@ -15,6 +15,7 @@ import croprouter from "./routes/crop-recommendation-router"
 import weather from "./routes/weather-router"
 import irrigation from "./routes/irrigation-routes"
 import compression from "compression";
+import discussionRouter from "./routes/discussion-router"
 
 
 const app = express();
@@ -50,6 +51,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(authRouter);
 app.use(cookieParser());
+app.use(discussionRouter);
 app.use("/users", authenticate, userRouter);
 app.use("/crops", croprouter);
 app.use("/weather", weather);
